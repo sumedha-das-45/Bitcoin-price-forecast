@@ -8,12 +8,10 @@ from keras.models import Sequential
 from keras.layers import Dense, LSTM, Input
 from keras.optimizers import Adam
 
-# Load Bitcoin data with auto_adjust explicitly set
 data = yf.download('BTC-USD', start='2017-01-01', end='2024-12-31', auto_adjust=True)[['Close']].dropna()
 scaler = MinMaxScaler()
 scaled_data = scaler.fit_transform(data)
 
-# Create time series data
 def create_sequences(data, seq_length=60):
     X, y = [], []
     for i in range(seq_length, len(data)):
@@ -24,7 +22,6 @@ def create_sequences(data, seq_length=60):
 X, y = create_sequences(scaled_data)
 X = X.reshape((X.shape[0], X.shape[1], 1))
 
-# Define objective function for optimization
 def objective(trial):
     units = trial.suggest_int('units', 32, 128)
     lr = trial.suggest_float('lr', 1e-5, 1e-2, log=True)
@@ -43,10 +40,8 @@ def objective(trial):
     loss = model.evaluate(X, y, verbose=0)
     return loss
 
-# Run optimization
 study = optuna.create_study(direction='minimize')
 study.optimize(objective, n_trials=30)
 
-# Print best result
 print("Best trial:")
 print(study.best_trial)
